@@ -1,10 +1,10 @@
 <script>
 
-  let player1, player2, player
+  let player1, player2, player, winner
 
   export let moveN, sign, winCases, board, playerEmojis, X, O
   let playerEmoji = playerEmojis.randomItem(),
-	  debug = '', debugMask = ''
+	  debug = false
 
   function changePlayer() {
 	  sign = moveN % 2 ? X : O
@@ -16,10 +16,9 @@
 	  fillBoard()
 	  moveN++
 	  if (isWin(sign)){
-	  	alert(player + ' is winner')
-		document.location.reload(true)
-	  } else
-	  changePlayer()
+	  	winner = player
+	  }
+	  else changePlayer()
   }
 
   function isWin(sign) {
@@ -46,6 +45,10 @@
 			<input placeholder="player2" bind:value={player2}>
 			<button type="submit">Play</button>
 		</form>
+	{/if}
+	{#if winner }
+		<h1>{winner} is winner!</h1>
+		<button onclick="document.location.reload(true)">Again?</button>
 	{/if}
 </main>
 
