@@ -1,43 +1,94 @@
 <script>
+  let player1 = 'random1', player2 = 'random2', player = player1, winner, standoff
 
-  let player1, player2, player, winner
+  export let moveN, sign, winCases, board, emojis, X, O, debug
+  let playerEmoji = emojis.randomItem(), availableSpots =  board.findIndices(s => s === ' '),
+		  sign2 = O
+  function sleep(ms) {
+	  return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-  export let moveN, sign, winCases, board, playerEmojis, X, O
-  let playerEmoji = playerEmojis.randomItem(),
-	  debug = false
+  class Player {
+	constructor(name, sign, move) {
+		  this.name = name
+		  this.sign = sign
+		  this.move = move
+	}
+  }
+
 
   function changePlayer() {
+	  moveN++
+	  sign2 = moveN % 2 ? O : X
 	  sign = moveN % 2 ? X : O
 	  player = moveN % 2 ? player1 : player2
-	  playerEmoji = playerEmojis.randomItem()
+	  playerEmoji = emojis.randomItem()
   }
 
-  function move(fillBoard) {
-	  fillBoard()
-	  moveN++
-	  if (isWin(sign)){
-	  	winner = player
-	  }
-	  else changePlayer()
+
+  async function botRandomMove() {
+	  await sleep(600)
+	  let spot = availableSpots.randomItem()
+	  board[spot] = sign
+	  afterMove()
   }
 
-  function isWin(sign) {
-	  let c = board.join('').replace(new RegExp(sign, 'g'), '1')
-	  return c.search(winCases) === 0
+  async function botMinimaxMove() {
+	  await sleep(600)
+	  let spot = minimax(board, sign)
+	  board[spot] = sign
+	  afterMove()
   }
+
+  function minimax(board, sign) {
+  	return isPlayerWon(board, sign) ? -10 : isPlayerWon(board, sign2)
+  }
+
+  function humanMove(move) {
+	  move()
+	  afterMove()
+  }
+
+  function hasAnyoneWon() {
+	  winner = isPlayerWon() ? player : null
+  }
+
+  function afterMove() {
+	  availableSpots = board.findIndices(s => s === ' ')
+	  if (!isPlayerWon(board, sign)) {
+		  changePlayer()
+		  // if current player is bot
+		  let name = player.toLowerCase()
+		  if (name.indexOf('random') >= 0) botRandomMove()
+		  else if (name.indexOf('minimax') >= 0) botMinimaxMove()
+	  } else hasAnyoneWon()
+  }
+
+  function isPlayerWon(board, sign) {
+  	  // Board => Mask
+	  let mask = board.join('').replace(new RegExp(sign, 'g'), '1')
+	  // To check mask with winning cases
+	  return mask.search(winCases) === 0
+  }
+
+
+	afterMove()
+
+
 </script>
 
 <main>
-	{#if player}
+	{#if player && winner === undefined}
 		<h1>{playerEmoji} It is your turn, {player}!</h1>
 		<article>
 			{#each board as b, i}
 				<!-- Some Tricks, anyway -->
-				<section on:click|once="{move(() => board[i] = sign)}">
+				<section on:click|once={humanMove(() => board[i] = sign)}>
 					{board[i]}
 				</section>
 			{/each}
 		</article>
+		<h2>Move Number: {moveN}, Sign {sign}</h2>
 	{:else}
 		<h1>Please enter your names</h1>
 		<form action="" on:submit={ ()=> player=player1 }>
@@ -45,15 +96,25 @@
 			<input placeholder="player2" bind:value={player2}>
 			<button type="submit">Play</button>
 		</form>
+		<h2>Docs</h2>
+		<ul>
+			<li>If you wanna play with Random bot, Please set player like: JohnRandom, randomBot or random</li>
+		</ul>
 	{/if}
 	{#if winner }
 		<h1>{winner} is winner!</h1>
 		<button onclick="document.location.reload(true)">Again?</button>
 	{/if}
+	{#if standoff }
+		<h1>No one won</h1>
+		<button onclick="document.location.reload(true)">Again?</button>
+	{/if}
+	<pre style="font-size: 20px">{availableSpots}</pre>
+	<pre style="font-size: 20px">{winner}</pre>
 </main>
 
 <style>
-	h1 {
+	h1, h2, h3 {
 		text-align: center;
 	}
 	main {
