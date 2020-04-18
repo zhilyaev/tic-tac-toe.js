@@ -59,16 +59,20 @@ export default class GameSession {
   }
   
   bot (playerName) {
+    switch (this.typeOfPlayer(playerName)) {
+      case 'random':
+        return this.botRandomMove()
+      case 'minimax':
+        return this.botMinimaxMove()
+      case 'human':
+        console.info(playerName,'is human')
+    }
+  }
+  
+  typeOfPlayer (playerName) {
     let n = playerName.toLowerCase()
-    if (n.indexOf('random') >= 0){
-      return this.botRandomMove()
-    }
-    else return function () {
-      console.log('Player is human')
-    }
-    // else if (n.indexOf('minimax') >= 0){
-    //   return this.botMinimaxMove()
-    // }
+    return n.indexOf('random') >= 0 ? 'random' :
+           n.indexOf('minimax') >= 0 ? 'minimax' : 'human';
   }
   
   changePlayer() {
@@ -125,6 +129,24 @@ export default class GameSession {
     let spot = this.availableSpots().randomItem()
     this.board[spot] = this.player.sign
     this.afterMove()
+  }
+  
+  async botMinimaxMove() {
+    await this.sleep(600)
+    let spot = this.minimax(this.board, this.player)
+    this.board[spot] = this.player.sign
+    this.afterMove()
+  }
+  
+  minimax(board, player) {
+    let moves = []
+    let emptySpots = this.availableSpots(board)
+    for (let i = 0; i < emptySpots; i++){
+      let move = {
+        index: board[emptySpots[i]]
+      }
+      
+    }
   }
   
   sleep(ms) {

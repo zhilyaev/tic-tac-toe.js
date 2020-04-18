@@ -1,9 +1,11 @@
 <script>
 import GameSession from './gameSession'
+import { fly } from 'svelte/transition'
 
 export let game
 let board = game.board,
     player = game.player,
+    winner,
     emojis = ['😃', '🙃', '😅', '😘']
 
 player.emoji = emojis.randomItem()
@@ -19,21 +21,26 @@ GameSession.prototype.renderChangePlayer = function () {
 }
 
 GameSession.prototype.congratulation = function () {
-  player = this.player
+  winner = this.player
+  this.player = undefined
 }
 
 
 </script>
 
 <div>
-  <h1>Your turn, {player.name}! {player.emoji}</h1>
-  <article>
-    {#each board as b, i}
+  {#if winner}
+    <h1>{winner.name} is winner!</h1>
+    {:else}
+    <h1>Your turn, {player.name}! {player.emoji}</h1>
+    <article transition:fly="{{ duration: 1100 }}">
+      {#each board as b, i}
         <section on:click={() => game.humanMove(i)}>
           {board[i]}
         </section>
-    {/each}
-  </article>
+      {/each}
+    </article>
+  {/if}
 </div>
 
 <style>

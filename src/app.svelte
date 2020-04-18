@@ -7,7 +7,7 @@ let debug = true
 let player1, player2, game
 	if (debug) {
 		player1 = 'Diamon'
-		player2 = 'Ellada'
+		player2 = 'random'
 		game = new GameSession(player1, player2)
 	}
 </script>
