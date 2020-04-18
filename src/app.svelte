@@ -6,8 +6,8 @@ export let debug
 
 let player1, player2, game
 	if (debug) {
-		player1 = 'random1'
-		player2 = 'random2'
+		player1 = 'Diamon'
+		player2 = 'Ellada'
 		game = new GameSession(player1, player2)
 	}
 </script>

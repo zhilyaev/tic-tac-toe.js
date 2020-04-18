@@ -2,7 +2,7 @@
 import GameSession from './gameSession'
 
 export let game
-let fixBoard = []
+let fixBoard = game.board
 
 GameSession.prototype.renderMove = function () {
   fixBoard = this.board
