@@ -2,19 +2,35 @@
 import GameSession from './gameSession'
 
 export let game
-let fixBoard = game.board
+let board = game.board,
+    player = game.player,
+    emojis = ['😃', '🙃', '😅', '😘']
+
+player.emoji = emojis.randomItem()
+
 
 GameSession.prototype.renderMove = function () {
-  fixBoard = this.board
+  board = this.board
 }
+
+GameSession.prototype.renderChangePlayer = function () {
+  player = this.player
+  player.emoji = emojis.randomItem()
+}
+
+GameSession.prototype.congratulation = function () {
+  player = this.player
+}
+
+
 </script>
 
 <div>
-  <h1>Your turn, {game.player.name}!</h1>
+  <h1>Your turn, {player.name}! {player.emoji}</h1>
   <article>
-    {#each fixBoard as b, i}
+    {#each board as b, i}
         <section on:click={() => game.humanMove(i)}>
-          {fixBoard[i]}
+          {board[i]}
         </section>
     {/each}
   </article>

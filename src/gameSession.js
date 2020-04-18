@@ -85,10 +85,14 @@ export default class GameSession {
   
   congratulation(){
     // Good job!
-    this.winner = this.player
+    // this.winner = this.player
   }
   
   renderMove () {
+  
+  }
+  
+  renderChangePlayer () {
   
   }
   
@@ -96,10 +100,13 @@ export default class GameSession {
     this.renderMove()
     if (this.isPlayerWon()){
       this.congratulation()
-    } else this.changePlayer()
-    
-    // Next Move
-    this.player.move()
+    }
+    else {
+      this.changePlayer()
+      this.renderChangePlayer()
+      // Next Move
+      this.player.move()
+    }
   }
   
   

@@ -2,7 +2,7 @@
 import Game from './game.svelte'
 import Footer from './footer.svelte'
 import GameSession from './gameSession'
-export let debug
+let debug = true
 
 let player1, player2, game
 	if (debug) {
