@@ -23,7 +23,7 @@ if (!Array.prototype.findIndices) {
       }
     }
     
-    return a.length === 0 ? -1 : a
+    return a.length === 0 ? [] : a
   }
 }
 
@@ -64,15 +64,15 @@ export default class GameSession {
   }
   
   bot (playerName) {
+    console.info('=======================================')
+    console.info('Новый ход:', this.i)
+    console.info(playerName,'ходи!')
     switch (this.typeOfPlayer(playerName)) {
       case 'random':
-        console.info(playerName,'is Random Bot')
         return this.botRandomMove()
       case 'minimax':
-        console.info(playerName,'is Minimax Bot')
         return this.botMinimaxMove()
       case 'human':
-        console.info(playerName,'is human')
     }
   }
   
@@ -87,7 +87,7 @@ export default class GameSession {
     this.player = this.i % 2 ? this.player1 : this.player2
   }
   
-  isPlayerWon(board=this.board, sign=this.player.sign, winCases=this.winCases) {
+  isSignWon(board=this.board, sign=this.player.sign, winCases=this.winCases) {
     // Board => Mask
     let mask = board.join('').replace(new RegExp(sign, 'g'), '1')
     // To check mask with winning cases
@@ -107,7 +107,9 @@ export default class GameSession {
   
   afterMove() {
     this.renderMove()
-    if (this.isPlayerWon()){
+    if (this.isSignWon()){
+      console.info('************************************')
+      console.info(`${this.player.name} побеждает!`)
       this.congratulation()
     }
     else {
@@ -123,103 +125,83 @@ export default class GameSession {
     return board.findIndices(s => s === ' ')
   }
   
+  humanMove(i){
+    this.move(i)
+  }
   
-  humanMove(i) {
-    this.board[i] = this.player.sign
+  move(index, player = this.player, board = this.board) {
+    console.info(`${player.name} занимает ${index+1} клетку`)
+    board[index] = player.sign
     this.afterMove()
   }
   async botRandomMove() {
-    await this.sleep(600)
-    let spot = this.availableSpots().randomItem()
-    this.board[spot] = this.player.sign
-    this.afterMove()
+    await this.sleep(500)
+    console.info(`${this.player.name} ходит случайно`)
+    let index = this.availableSpots().randomItem()
+    this.move(index)
   }
   async botMinimaxMove() {
-    await this.sleep(600)
-    let spot = this.minimax(this.board, this.player)
-    this.board[spot] = this.player.sign
-    this.afterMove()
-  }
-  
-  minimax(board, player) {
-    // Copy
-    board = [...board]
-    player = {...player}
-    let emptySpots = this.availableSpots(board)
-    
-    
-    if (this.isPlayerWon(board, player.sign)){
-      return this.typeOfPlayer(player.name) === 'minimax' ? {score: 1} : {score: -1};
-    } else if (emptySpots === -1) {
-      return {score: 0}
+    // Если все клетки пустые, то ходи рандомно
+    if (this.availableSpots().length === 9){
+      await this.botRandomMove()
     }
-    
-
-
-    let spots = []
-    for (let emptyIndex of emptySpots){
-      let move = {}
-      move.index = emptyIndex
-      board[emptyIndex] = player.sign
-      move.score = this.minimax(board, player).score
-      spots.push(move)
-    }
-    
-    
-    
-    let bestScore
-    let bestIndex
-    if (this.typeOfPlayer(player.name) === 'minimax'){
-      bestScore = -Infinity
-      for (let m of spots){
-        if (m.score > bestScore){
-          bestScore = m.score
-          bestIndex = m.index
-        }
-      }
+    // Если центральная клавиша занята и бот ходит вторым
+    else if (this.availableSpots().length === 8 && this.board[4] !== ' '){
+      // Выбрать случайный угол
+      console.info(`${this.player.name} занимает случайный угол`)
+      let i = [0,2,6,8].randomItem()
+      this.move(i)
     }
     else {
-      bestScore = Infinity
-      for (let m of spots){
-        if (m.score > bestScore){
-          bestScore = m.score
-          bestIndex = m.index
-        }
-      }
+      console.info(`${this.player.name} ходит по-минимаксу`)
+      let {index} = this.minimax(this.board, this.player.sign)
+      this.move(index)
     }
-    
-    return bestIndex
   }
   
+  minimax(board, sign) {
+    
+    let emptySpots = this.availableSpots(board)
+    
+    if (emptySpots.length === 0){
+      // Бот выиграл
+      if (this.isSignWon(board, 'O')) return {score: 1}
+      // Человек выиграл
+      else if (this.isSignWon(board, 'X')) return {score: -1}
+      // Ничья
+      else return {score: 0}
+    } else {
+      let moves = []
+      for (let emptyIndex of emptySpots){
+        let move = {}
+        move.index = emptyIndex
+        let copyBoard = [...board]
+        copyBoard[emptyIndex] = sign
+        if (sign === 'O'){
+          move.score = this.minimax(copyBoard, 'X').score
+        } else {
+            move.score = this.minimax(copyBoard, 'O').score
+        }
+        
+        moves.push(move)
+      }
+      if (moves.length===1){
+        // console.debug('Только одно значение в moves', moves[0])
+        return moves[0]
+      } else {
+        // console.debug('Несколько moves:', moves)
+        let best = {score: -2}
+        for (let m of moves){
+          if (m.score > best.score){
+            best = m
+          }
+        }
+        // console.debug('Лучший =', best)
+        return best
+      }
+      
+    }
+  }
+  
+  
 }
-
-// class Player {
-//   constructor({name, sign}, m) {
-//     this.name = name
-//     this.sign = sign
-//     this.move = m
-//   }
-//
-//   move(afterMove) {
-//     console.log('default move')
-//     afterMove()
-//   }
-// }
-
-
-// export const gameSession = (playerName1, playerName2) => ({
-//   board: [
-//     ' ', ' ', ' ',
-//     ' ', ' ', ' ',
-//     ' ', ' ', ' ',
-//   ],
-//   player1: {
-//     name: playerName1,
-//     sign: 'X'
-//   },
-//   player2: {
-//     name: playerName2,
-//     sign: 'O'
-//   },
-//
-// })

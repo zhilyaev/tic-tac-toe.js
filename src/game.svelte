@@ -21,19 +21,61 @@ GameSession.prototype.renderChangePlayer = function () {
 }
 
 GameSession.prototype.congratulation = function () {
+  // this.sleep(200)
   winner = this.player
   this.player = undefined
 }
-
-
 </script>
 
 <div>
+<!--  <hr>-->
+<!--  {game.minimax([-->
+<!--  'X', 'O', 'X',-->
+<!--  'O', 'O', 'X',-->
+<!--  'X', 'X', 'O',-->
+<!--  ], 'O').index}-->
+<!--  <hr>-->
+  {game.minimax([
+  ' ', 'X', 'O',
+  ' ', 'X', ' ',
+  ' ', ' ', ' ',
+  ], 'O').index}
+  <hr>
+<!--  {game.minimax([-->
+<!--  'X', 'O', 'O',-->
+<!--  'O', 'X', ' ',-->
+<!--  'X', 'X', ' ',-->
+<!--  ], 'O').index===8}-->
+<!--  <hr>-->
+<!--  {game.minimax([-->
+<!--  'X', ' ', 'O',-->
+<!--  'O', ' ', 'O',-->
+<!--  ' ', 'X', 'X',-->
+<!--  ], 'O').index===6}-->
+<!--  <hr>-->
+<!--  {game.minimax([-->
+<!--  ' ', ' ', ' ',-->
+<!--  ' ', ' ', ' ',-->
+<!--  ' ', ' ', 'X',-->
+<!--  ], 'O').index}-->
+<!--  <hr>-->
+<!--  {game.minimax([-->
+<!--  'X', 'X', ' ',-->
+<!--  ' ', ' ', ' ',-->
+<!--  ' ', ' ', 'O',-->
+<!--  ], 'O').index}-->
+<!--  <hr>-->
+<!--  {game.minimax([-->
+<!--  'X', 'X', ' ',-->
+<!--  ' ', 'O', ' ',-->
+<!--  'X', ' ', 'O',-->
+<!--  ], 'O').index}-->
+  <hr>
   {#if winner}
     <h1>{winner.name} is winner!</h1>
     {:else}
     <h1>Your turn, {player.name}! {player.emoji}</h1>
-    <article transition:fly="{{ duration: 1100 }}">
+    <article transition:fly="{{ duration: 600 }}">
       {#each board as b, i}
         <section on:click={() => game.humanMove(i)}>
           {board[i]}

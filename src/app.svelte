@@ -43,7 +43,4 @@ let player1, player2, game
 			max-width: none;
 		}
 	}
-
-	form {}
-
 </style>
