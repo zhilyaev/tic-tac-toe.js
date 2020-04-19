@@ -27,7 +27,12 @@ if (!Array.prototype.findIndices) {
   }
 }
 
+
 export default class GameSession {
+  
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
   
   constructor(playerName1, playerName2) {
     this.board = [
@@ -61,8 +66,10 @@ export default class GameSession {
   bot (playerName) {
     switch (this.typeOfPlayer(playerName)) {
       case 'random':
+        console.info(playerName,'is Random Bot')
         return this.botRandomMove()
       case 'minimax':
+        console.info(playerName,'is Minimax Bot')
         return this.botMinimaxMove()
       case 'human':
         console.info(playerName,'is human')
@@ -91,11 +98,9 @@ export default class GameSession {
     // Good job!
     // this.winner = this.player
   }
-  
   renderMove () {
   
   }
-  
   renderChangePlayer () {
   
   }
@@ -123,14 +128,12 @@ export default class GameSession {
     this.board[i] = this.player.sign
     this.afterMove()
   }
-  
   async botRandomMove() {
     await this.sleep(600)
     let spot = this.availableSpots().randomItem()
     this.board[spot] = this.player.sign
     this.afterMove()
   }
-  
   async botMinimaxMove() {
     await this.sleep(600)
     let spot = this.minimax(this.board, this.player)
@@ -139,19 +142,55 @@ export default class GameSession {
   }
   
   minimax(board, player) {
-    let moves = []
+    // Copy
+    board = [...board]
+    player = {...player}
     let emptySpots = this.availableSpots(board)
-    for (let i = 0; i < emptySpots; i++){
-      let move = {
-        index: board[emptySpots[i]]
-      }
-      
+    
+    
+    if (this.isPlayerWon(board, player.sign)){
+      return this.typeOfPlayer(player.name) === 'minimax' ? {score: 1} : {score: -1};
+    } else if (emptySpots === -1) {
+      return {score: 0}
     }
+    
+
+
+    let spots = []
+    for (let emptyIndex of emptySpots){
+      let move = {}
+      move.index = emptyIndex
+      board[emptyIndex] = player.sign
+      move.score = this.minimax(board, player).score
+      spots.push(move)
+    }
+    
+    
+    
+    let bestScore
+    let bestIndex
+    if (this.typeOfPlayer(player.name) === 'minimax'){
+      bestScore = -Infinity
+      for (let m of spots){
+        if (m.score > bestScore){
+          bestScore = m.score
+          bestIndex = m.index
+        }
+      }
+    }
+    else {
+      bestScore = Infinity
+      for (let m of spots){
+        if (m.score > bestScore){
+          bestScore = m.score
+          bestIndex = m.index
+        }
+      }
+    }
+    
+    return bestIndex
   }
   
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
 }
 
 // class Player {
