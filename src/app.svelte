@@ -2,7 +2,7 @@
 import Game from './game.svelte'
 import Footer from './footer.svelte'
 import GameSession from './gameSession'
-let debug = true
+let debug = false
 
 let player1, player2, game
 	if (debug) {
@@ -15,13 +15,15 @@ let player1, player2, game
 <main>
 	{#if game}
 		<Game {game}/>
-		<button on:click={() => game = undefined}>New Game</button>
+		<button id="newGame" on:click={() => game = undefined}>New Game</button>
 		{:else}
 		<h1>Your names</h1>
 		<form action="" on:submit={()=> game = new GameSession(player1, player2)}>
-			<input placeholder="player1" bind:value={player1}>
-			<input placeholder="player2" bind:value={player2}>
-			<button type="submit">Play</button>
+			<input required placeholder="🧑‍🚀" bind:value={player1}>
+			🆚
+			<input required placeholder="🧑‍🚀" bind:value={player2}>
+			<br>
+			<button id="play" type="submit">Play 🚀</button>
 		</form>
 	{/if}
 	<Footer />
@@ -42,5 +44,22 @@ let player1, player2, game
 		main {
 			max-width: none;
 		}
+	}
+	input, button {
+		text-align: center;
+		min-width: 130px;
+		max-width: 130px;
+		width: 130px;
+	}
+	#play {
+		min-width: 285px;
+		max-width: 285px;
+		width: 285px;
+	}
+	#newGame {
+		min-width: 100px;
+		max-width: 100px;
+		width: 100px;
+		/*border: black 2px solid;*/
 	}
 </style>

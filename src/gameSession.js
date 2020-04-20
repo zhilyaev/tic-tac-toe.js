@@ -1,9 +1,24 @@
+/**
+ * There is the simple way for make sleep(ms) in JS
+ * @param {int} ms
+ * @returns {Promise<unknown>}
+ */
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+/**
+ * Get Random value from array
+ * @returns {*}
+ */
 Array.prototype.randomItem = function () {
   return this[Math.floor(Math.random() * this.length)]
 }
 
 
 if (!Array.prototype.findIndices) {
+  /**
+   * @returns {Array}
+   * @param predicate
+   */
   Array.prototype.findIndices = function(predicate) {
     if (this == null) {
       throw new TypeError('Array.prototype.findIndices called on null or undefined')
@@ -28,12 +43,14 @@ if (!Array.prototype.findIndices) {
 }
 
 
+
 export default class GameSession {
-  
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-  
+  /**
+   * There is create new Game for TicTacToe
+   * Auto-start game if player1 is somebody bot
+   * @param playerName1
+   * @param playerName2
+   */
   constructor(playerName1, playerName2) {
     this.board = [
       ' ', ' ', ' ',
@@ -63,6 +80,21 @@ export default class GameSession {
     this.player1.move()
   }
   
+  /**
+   * Get free spots of a board
+   * @param board
+   * @returns {Array}
+   */
+  availableSpots (board=this.board) {
+    return board.findIndices(s => s === ' ')
+  }
+  
+  /**
+   * This function will be call every time before somebody player move
+   * Also this function set move function for bot
+   * @param playerName
+   * @returns {Promise<void>}
+   */
   bot (playerName) {
     console.info('=======================================')
     console.info('Новый ход:', this.i)
@@ -76,50 +108,67 @@ export default class GameSession {
     }
   }
   
+  /**
+   * Return type of Player between [random, minimax, human]
+   * @param playerName
+   * @returns {string}
+   */
   typeOfPlayer (playerName) {
     let n = playerName.toLowerCase()
     return n.indexOf('random') >= 0 ? 'random' :
            n.indexOf('minimax') >= 0 ? 'minimax' : 'human';
   }
   
+  /**
+   * Next Player
+   */
   changePlayer() {
     this.i++
     this.player = this.i % 2 ? this.player1 : this.player2
   }
   
-  isSignWon(board=this.board, sign=this.player.sign, winCases=this.winCases) {
+  /**
+   * Did this character win?
+   * @param board
+   * @param sign
+   * @param winCases
+   * @returns {boolean}
+   */
+  isSignBeneficial(board=this.board, sign=this.player.sign, winCases=this.winCases) {
     // Board => Mask
     let mask = board.join('').replace(new RegExp(sign, 'g'), '1')
     // To check mask with winning cases
     return mask.search(winCases) === 0
   }
   
-  whoIsWon(board){
-    return this.isSignWon(board, this.player1.sign)
+  /**
+   * Who won? - player1 or player2 or nobody or continue?
+   * @param board
+   * @returns {*}
+   */
+  whoWon(board){
+    return this.isSignBeneficial(board, this.player1.sign)
       ? this.player1
-      : this.isSignWon(board, this.player2.sign)
+      : this.isSignBeneficial(board, this.player2.sign)
         ? this.player2
         : this.availableSpots().length === 0
           ? 'nobody' : 'continue'
   }
   
-  congratulation(){
-    // Good job!
-    // this.winner = this.player
-  }
-  renderMove () {
-  
-  }
-  renderChangePlayer () {
-  
-  }
-  
+  /**
+   * This function will be call every time  when some of the players finish his move
+   */
   afterMove() {
     this.renderMove()
-    if (this.isSignWon()){
+    if (this.isSignBeneficial()){
       console.info('************************************')
       console.info(`${this.player.name} побеждает!`)
-      this.congratulation()
+      this.renderCongratulation()
+    }
+    else if(this.availableSpots().length === 0){
+      console.info('************************************')
+      console.info('Никто не выиграл')
+      this.renderNoOneWon()
     }
     else {
       this.changePlayer()
@@ -129,19 +178,24 @@ export default class GameSession {
     }
   }
   
-  
-  availableSpots (board=this.board) {
-    return board.findIndices(s => s === ' ')
+  getOpponentFor(player){
+    return player === this.player1 ? this.player2 : this.player1;
   }
   
+  /**
+   * Human is making a move
+   * @param {number} i
+   */
   humanMove(i){
     this.move(i)
   }
   
-  renderSpotIsBusy() {
-  
-  }
-  
+  /**
+   * Base function for all player
+   * @param index
+   * @param player
+   * @param board
+   */
   move(index, player = this.player, board = this.board) {
     if (this.availableSpots(board).includes(index)){
       console.info(`${player.name} занимает ${index+1}-ую клетку`)
@@ -152,12 +206,65 @@ export default class GameSession {
       this.renderSpotIsBusy()
     }
   }
+  
+  
+////////////////////////////////////////////////////////////
+//                                                        //
+//     RRRRRR  EEEEEEE NN   NN DDDDD   EEEEEEE RRRRRR     //
+//     RR   RR EE      NNN  NN DD  DD  EE      RR   RR    //
+//     RRRRRR  EEEEE   NN N NN DD   DD EEEEE   RRRRRR     //
+//     RR  RR  EE      NN  NNN DD   DD EE      RR  RR     //
+//     RR   RR EEEEEEE NN   NN DDDDDD  EEEEEEE RR   RR    //
+//                                                        //
+////////////////////////////////////////////////////////////
+  
+  /**
+   * Override it if you want to use custom render when somebody was win
+   */
+  renderCongratulation(){
+    // Example:
+    // alert('Congratulation', this.player.name)
+  }
+  renderMove () {
+  
+  }
+  renderChangePlayer () {
+  
+  }
+  renderSpotIsBusy() {
+  
+  }
+  renderNoOneWon() {
+  
+  }
+  
+//////////////////////////////////////////////////////
+//   ____      _     _   _  ____    ___   __  __    //
+//   |  _ \    / \   | \ | ||  _ \  / _ \ |  \/  |  //
+//   | |_) |  / _ \  |  \| || | | || | | || |\/| |  //
+//   |  _ <  / ___ \ | |\  || |_| || |_| || |  | |  //
+//   |_| \_\/_/   \_\|_| \_||____/  \___/ |_|  |_|  //
+//                                                  //
+//////////////////////////////////////////////////////
+  
   async botRandomMove() {
-    await this.sleep(500)
+    await sleep(500)
     console.info(`${this.player.name} ходит случайно`)
     let index = this.availableSpots().randomItem()
     this.move(index)
   }
+  
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          //
+//     .___  ___.  __  .__   __.  __  .___  ___.      ___      ___   ___    //
+//     |   \/   | |  | |  \ |  | |  | |   \/   |     /   \     \  \ /  /    //
+//     |  \  /  | |  | |   \|  | |  | |  \  /  |    /  ^  \     \  V  /     //
+//     |  |\/|  | |  | |  . `  | |  | |  |\/|  |   /  /_\  \     >   <      //
+//     |  |  |  | |  | |  |\   | |  | |  |  |  |  /  _____  \   /  .  \     //
+//     |__|  |__| |__| |__| \__| |__| |__|  |__| /__/     \__\ /__/ \__\    //
+//                                                                          //
+//////////////////////////////////////////////////////////////////////////////
+  
   async botMinimaxMove() {
     // Если все клетки пустые, то ходи рандомно
     if (this.availableSpots().length === 9){
@@ -177,12 +284,13 @@ export default class GameSession {
     }
   }
   
-  getOpponentFor(player){
-    return player === this.player1 ? this.player2 : this.player1;
-  }
-  
+  /**
+   * Should I do it more simplify?
+   * @param board
+   * @returns {string|{score: number}}
+   */
   minimaxReturnScore(board) {
-    let winner = this.whoIsWon(board)
+    let winner = this.whoWon(board)
     switch (winner) {
       case 'nobody':
         return {score: 0}
@@ -198,7 +306,13 @@ export default class GameSession {
     }
   }
   
-  
+  /**
+   * Main algorithm of MINIMAX
+   * @param newBoard
+   * @param player
+   * @param depth
+   * @returns {*|string|{score: number}}
+   */
   minimax(newBoard, player, depth) {
     let returnScore = this.minimaxReturnScore(newBoard)
     if (returnScore !== 'continue') return returnScore
@@ -208,6 +322,13 @@ export default class GameSession {
     return this.minimaxBestMove(moves, player)
   }
   
+  /**
+   * Collect all available moves
+   * @param newBoard
+   * @param player
+   * @param depth
+   * @returns {[]}
+   */
   minimaxMoves(newBoard, player, depth) {
     let moves = []
     for (let i of this.availableSpots(newBoard)){
@@ -221,6 +342,12 @@ export default class GameSession {
     return moves
   }
   
+  /**
+   * Chose the best move of collect minimaxMoves()
+   * @param moves
+   * @param player
+   * @returns {*}
+   */
   minimaxBestMove(moves, player) {
     let bestMove;
     if(this.typeOfPlayer(player.name)==='minimax'){
@@ -243,5 +370,4 @@ export default class GameSession {
     
     return moves[bestMove]
   }
-  
 }
