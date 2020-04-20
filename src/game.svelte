@@ -35,12 +35,18 @@ GameSession.prototype.congratulation = function () {
 <!--  'X', 'X', 'O',-->
 <!--  ], 'O').index}-->
 <!--  <hr>-->
-  {game.minimax([
-  ' ', 'X', 'O',
-  ' ', 'X', ' ',
-  ' ', ' ', ' ',
-  ], 'O').index}
-  <hr>
+<!--  {game.minimax([-->
+<!--  'X', ' ', 'O',-->
+<!--  'X', ' ', ' ',-->
+<!--  ' ', ' ', ' ',-->
+<!--  ], 'O').index}-->
+<!--  <hr>-->
+<!--  {game.minimax([-->
+<!--  'O', 'X', 'O',-->
+<!--  'X', 'X', 'O',-->
+<!--  ' ', ' ', ' ',-->
+<!--  ], 'X').index}-->
+<!--  <hr>-->
 <!--  {game.minimax([-->
 <!--  'X', 'O', 'O',-->
 <!--  'O', 'X', ' ',-->
@@ -65,24 +71,17 @@ GameSession.prototype.congratulation = function () {
 <!--  ' ', ' ', 'O',-->
 <!--  ], 'O').index}-->
 <!--  <hr>-->
-<!--  {game.minimax([-->
-<!--  'X', 'X', ' ',-->
-<!--  ' ', 'O', ' ',-->
-<!--  'X', ' ', 'O',-->
-<!--  ], 'O').index}-->
-  <hr>
-  {#if winner}
+    {#if winner}
     <h1>{winner.name} is winner!</h1>
-    {:else}
+    {/if}
     <h1>Your turn, {player.name}! {player.emoji}</h1>
-    <article transition:fly="{{ duration: 600 }}">
+    <article>
       {#each board as b, i}
         <section on:click={() => game.humanMove(i)}>
           {board[i]}
         </section>
       {/each}
     </article>
-  {/if}
 </div>
 
 <style>

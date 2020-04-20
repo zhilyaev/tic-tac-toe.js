@@ -94,6 +94,15 @@ export default class GameSession {
     return mask.search(winCases) === 0
   }
   
+  whoIsWon(board){
+    return this.isSignWon(board, this.player1.sign)
+      ? this.player1
+      : this.isSignWon(board, this.player2.sign)
+        ? this.player2
+        : this.availableSpots().length === 0
+          ? 'nobody' : 'continue'
+  }
+  
   congratulation(){
     // Good job!
     // this.winner = this.player
@@ -129,10 +138,19 @@ export default class GameSession {
     this.move(i)
   }
   
+  renderSpotIsBusy() {
+  
+  }
+  
   move(index, player = this.player, board = this.board) {
-    console.info(`${player.name} занимает ${index+1} клетку`)
-    board[index] = player.sign
-    this.afterMove()
+    if (this.availableSpots(board).includes(index)){
+      console.info(`${player.name} занимает ${index+1}-ую клетку`)
+      board[index] = player.sign
+      this.afterMove()
+    } else {
+      console.info(`${player.name} ${index+1}-ая клетка занята. Попробуй другую.`)
+      this.renderSpotIsBusy()
+    }
   }
   async botRandomMove() {
     await this.sleep(500)
@@ -154,54 +172,76 @@ export default class GameSession {
     }
     else {
       console.info(`${this.player.name} ходит по-минимаксу`)
-      let {index} = this.minimax(this.board, this.player.sign)
+      let {index} = this.minimax(this.board, this.player)
       this.move(index)
     }
   }
   
-  minimax(board, sign) {
-    
-    let emptySpots = this.availableSpots(board)
-    
-    if (emptySpots.length === 0){
-      // Бот выиграл
-      if (this.isSignWon(board, 'O')) return {score: 1}
-      // Человек выиграл
-      else if (this.isSignWon(board, 'X')) return {score: -1}
-      // Ничья
-      else return {score: 0}
-    } else {
-      let moves = []
-      for (let emptyIndex of emptySpots){
-        let move = {}
-        move.index = emptyIndex
-        let copyBoard = [...board]
-        copyBoard[emptyIndex] = sign
-        if (sign === 'O'){
-          move.score = this.minimax(copyBoard, 'X').score
-        } else {
-            move.score = this.minimax(copyBoard, 'O').score
+  getOpponentFor(player){
+    return player === this.player1 ? this.player2 : this.player1;
+  }
+  
+  minimaxReturnScore(board) {
+    let winner = this.whoIsWon(board)
+    switch (winner) {
+      case 'nobody':
+        return {score: 0}
+      case 'continue':
+        return 'continue'
+      default:
+        switch (this.typeOfPlayer(winner.name)) {
+          case 'minimax':
+            return {score:  1}
+          default:
+            return {score: -1}
         }
-        
-        moves.push(move)
-      }
-      if (moves.length===1){
-        // console.debug('Только одно значение в moves', moves[0])
-        return moves[0]
-      } else {
-        // console.debug('Несколько moves:', moves)
-        let best = {score: -2}
-        for (let m of moves){
-          if (m.score > best.score){
-            best = m
-          }
-        }
-        // console.debug('Лучший =', best)
-        return best
-      }
-      
     }
   }
   
+  
+  minimax(newBoard, player, depth) {
+    let returnScore = this.minimaxReturnScore(newBoard)
+    if (returnScore !== 'continue') return returnScore
+    
+    let moves = this.minimaxMoves(newBoard, player, depth)
+    
+    return this.minimaxBestMove(moves, player)
+  }
+  
+  minimaxMoves(newBoard, player, depth) {
+    let moves = []
+    for (let i of this.availableSpots(newBoard)){
+      let move = {}
+      move.index = i
+      newBoard[i] = player.sign
+      move.score = this.minimax(newBoard, this.getOpponentFor(player), depth+1).score
+      newBoard[i] = ' '
+      moves.push(move)
+    }
+    return moves
+  }
+  
+  minimaxBestMove(moves, player) {
+    let bestMove;
+    if(this.typeOfPlayer(player.name)==='minimax'){
+      let bestScore = -10000;
+      for(let i = 0; i < moves.length; i++){
+        if(moves[i].score > bestScore){
+          bestScore = moves[i].score;
+          bestMove = i;
+        }
+      }
+    }else {
+      let bestScore = 10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score < bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
+        }
+      }
+    }
+    
+    return moves[bestMove]
+  }
   
 }
