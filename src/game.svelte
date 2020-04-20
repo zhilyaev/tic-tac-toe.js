@@ -23,7 +23,7 @@ GameSession.prototype.renderChangePlayer = function () {
 GameSession.prototype.renderCongratulation = function () {
   // this.sleep(200)
   winner = this.player
-  winner.msg = winner.name + 'is winner'
+  winner.msg = winner.name + ' is winner!'
   this.player = undefined
 }
 
