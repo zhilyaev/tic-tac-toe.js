@@ -29,7 +29,7 @@ GameSession.prototype.renderCongratulation = function () {
 
 GameSession.prototype.renderNoOneWon = function () {
   winner = {
-    msg: '🎌 No one won 😔'
+    msg: '🏁 No one won 😔'
   }
 }
 </script>

@@ -19,12 +19,21 @@ let player1, player2, game
 		{:else}
 		<h1>Your names</h1>
 		<form action="" on:submit={()=> game = new GameSession(player1, player2)}>
-			<input required placeholder="🧑‍🚀" bind:value={player1}>
+			<input required placeholder="🧑‍🚀 – X " bind:value={player1}>
 			🆚
-			<input required placeholder="🧑‍🚀" bind:value={player2}>
+			<input required placeholder="🧑‍🚀 – O" bind:value={player2}>
 			<br>
 			<button id="play" type="submit">Play 🚀</button>
 		</form>
+		<h2>How to play with bot?</h2>
+		<p><b>Random Bot</b>
+			<br>His name has to contain 'random'.
+			<br>Example: <i>MikeRandom, randomner, randomBot</i>
+		</p>
+		<p><b>Minimax Bot</b>
+			<br>His name has to contain 'minimax'.
+			<br>Example: <i>JohnMinimax, minimax, BotMinimax</i>
+		</p>
 	{/if}
 	<Footer />
 </main>
