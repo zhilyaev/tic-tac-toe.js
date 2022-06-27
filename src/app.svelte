@@ -25,7 +25,7 @@ let player1, player2, game
 			<br>
 			<button id="play" type="submit">Play 🚀</button>
 		</form>
-		<h2>How to play with bot?</h2>
+		<h2>How to play with bots?</h2>
 		<p><b>Random Bot</b>
 			<br>His name has to contain 'random'.
 			<br>Example: <i>MikeRandom, randomner, randomBot</i>
